@@ -30,14 +30,14 @@ A **React single-page application** for managing student records. The app allows
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/your-username/student-management-dashboard.git
+git clone https://github.com/Bhumika2101/NavGurukul_Assignment.git
 
 ```
 
 2. **Navigate into the project folder**
 
 ```bash
-cd student-management-dashboard
+cd NavGurukul_Assignment
 
 ```
 
@@ -60,3 +60,7 @@ npm run dev
    Open it in your browser to view the app.
 
 ---
+
+## 🔗 Live Demo
+
+👉 [View Deployed App on Vercel](https://nav-gurukul-assignment.vercel.app/)
