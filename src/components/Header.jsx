@@ -1,11 +1,18 @@
 import React, { useState } from "react";
-
+import Logo from "../assets/logo.png"; 
 const Header = ({ onAddStudent, onShowCourses }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   return (
     <header className="bg-white dark:bg-gray-800 shadow-md">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+        <div className="h-15 w-15 flex items-center justify-center bg-white rounded-full shadow-md">
+    <img
+      src={Logo}
+      alt="Logo"
+      className="h-12 w-12 object-contain"
+    />
+    </div>
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-white text-left flex-grow ml-4">
           Student Management Dashboard
         </h1>
         {/* Desktop actions */}
