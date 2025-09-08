@@ -1,8 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  saveStudentImageToDB,
-  getStudentImageFromDB,
-} from "../services/studentImageDB";
 
 const StudentForm = ({
   studentToEdit,
@@ -14,44 +10,26 @@ const StudentForm = ({
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    courseId: 0, // Use 0 to indicate "not selected"
-    imageUrl: "",
+    courseId: 0,
+    profileImage: "",
   });
   const [errors, setErrors] = useState({});
   const fileInputRef = useRef(null);
-  const blobUrlRef = useRef(null);
-
-  // Effect to clean up the blob URL when the component unmounts
-  useEffect(() => {
-    return () => {
-      if (blobUrlRef.current) {
-        URL.revokeObjectURL(blobUrlRef.current);
-      }
-    };
-  }, []);
 
   useEffect(() => {
-    // When the form context changes (e.g., opening for edit/add),
-    // revoke any existing temporary URL to prevent memory leaks.
-    if (blobUrlRef.current) {
-      URL.revokeObjectURL(blobUrlRef.current);
-      blobUrlRef.current = null;
-    }
-
     if (studentToEdit) {
       setFormData({
         name: studentToEdit.name,
         email: studentToEdit.email,
         courseId: studentToEdit.courseId,
-        imageUrl: studentToEdit.imageUrl || "",
+        profileImage: studentToEdit.profileImage || "",
       });
     } else {
-      // Reset form for adding a new student
       setFormData({
         name: "",
         email: "",
         courseId: 0,
-        imageUrl: "",
+        profileImage: "",
       });
     }
     setErrors({});
@@ -74,27 +52,17 @@ const StudentForm = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (validate()) {
-      let imageUrl = formData.imageUrl;
-      // Try to get the image from IndexedDB if available
-      const key = formData.name || "student-profile-image";
-      const blob = await getStudentImageFromDB(key);
-      if (blob) {
-        imageUrl = URL.createObjectURL(blob);
-      } else {
-        imageUrl =
-          imageUrl ||
-          `https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png`;
-      }
       const finalStudentData = {
         name: formData.name,
         email: formData.email,
         courseId: Number(formData.courseId),
-        imageUrl,
+        profileImage:
+          formData.profileImage ||
+          `https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png`,
       };
-
       if (studentToEdit) {
         onSave({ ...studentToEdit, ...finalStudentData });
       } else {
@@ -104,37 +72,17 @@ const StudentForm = ({
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // Replace your handleImageChange with this:
-  const handleImageChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const key = formData.name || "student-profile-image";
-      await saveStudentImageToDB(key, file);
-      const url = URL.createObjectURL(file);
-      setFormData((prev) => ({ ...prev, imageUrl: url }));
-      if (blobUrlRef.current) {
-        URL.revokeObjectURL(blobUrlRef.current);
-      }
-      blobUrlRef.current = url;
+    const { name, value, files } = e.target;
+    if (name === "profileImage" && files && files[0]) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setFormData((prev) => ({ ...prev, profileImage: reader.result }));
+      };
+      reader.readAsDataURL(files[0]);
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
-
-  // Add this useEffect to restore the image on mount:
-  useEffect(() => {
-    const key = formData.name || "student-profile-image";
-    getStudentImageFromDB(key).then((blob) => {
-      if (blob) {
-        const url = URL.createObjectURL(blob);
-        setFormData((prev) => ({ ...prev, imageUrl: url }));
-        blobUrlRef.current = url;
-      }
-    });
-    // eslint-disable-next-line
-  }, []);
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();
@@ -150,7 +98,7 @@ const StudentForm = ({
           <div className="mt-1 flex items-center space-x-4">
             <img
               src={
-                formData.imageUrl ||
+                formData.profileImage ||
                 `https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png`
               }
               alt="Profile Preview"
@@ -158,8 +106,9 @@ const StudentForm = ({
             />
             <input
               type="file"
+              name="profileImage"
               ref={fileInputRef}
-              onChange={handleImageChange}
+              onChange={handleChange}
               accept="image/png, image/jpeg, image/gif"
               className="hidden"
               aria-hidden="true"

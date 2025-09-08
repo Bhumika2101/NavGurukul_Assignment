@@ -11,8 +11,8 @@ const StudentCard = ({ student, courseName, onEdit, onDelete }) => {
           <img
             className="h-20 w-20 rounded-full object-cover"
             src={
-              student.imageUrl
-                ? student.imageUrl
+              student.profileImage
+                ? student.profileImage
                 : `https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png`
             }
             alt={`${student.name}'s profile`}
